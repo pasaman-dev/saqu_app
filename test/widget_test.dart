@@ -1,30 +1,42 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:saqu_app/models/detail_surah.dart';
+import 'package:saqu_app/models/surah.dart';
 
-import 'package:saqu_app/main.dart';
+void main() async {
+  Uri url = Uri.parse("https://api.quran.gading.dev/surah");
+  var res = await http.get(url);
 
-void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  var data = (jsonDecode(res.body) as Map<String, dynamic>)["data"];
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  // Get data surah start from 0 - 113 (114 surah)
+  // print(data[113]);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  // Transform data from api => Model
+  Surah surahAnnas = Surah.fromJson(data[113]);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+  // You can print using models function or instance
+  // print(surahAnnas.name);
+  // print(surahAnnas.number);
+  // print(surahAnnas.numberOfVerses);
+  // print(surahAnnas.revelation);
+  // print(surahAnnas.sequence);
+  // print(surahAnnas.toJson());
+
+  // Print nested object / instance
+  // print(surahAnnas.name?.long);
+
+  Uri urlAnnas =
+      Uri.parse("https://api.quran.gading.dev/surah/${surahAnnas.number}");
+  var resAnnas = await http.get(urlAnnas);
+
+  var dataAnnas = (jsonDecode(resAnnas.body) as Map<String, dynamic>)["data"];
+
+  // print all rawa data
+  // print(dataAnnas);
+
+  DetailSurah annasDetail = DetailSurah.fromJson(dataAnnas);
+
+  print(annasDetail.verses![0].text!.arab);
 }
